@@ -1,0 +1,15 @@
+[project]
+name = "3dllm-mem"
+version = "0.1.0"
+description = "Reproduction scaffold for 3DLLM-Mem"
+requires-python = ">=3.10,<3.15"
+dependencies = [
+  "torch>=2.3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
