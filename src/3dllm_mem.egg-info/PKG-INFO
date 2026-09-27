@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: 3dllm-mem
-Version: 0.1.0
-Summary: Reproduction scaffold for 3DLLM-Mem
-Requires-Python: <3.15,>=3.10
-Requires-Dist: torch>=2.3
-Provides-Extra: dev
-Requires-Dist: pytest>=8.0; extra == "dev"

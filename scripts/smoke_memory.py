@@ -1,30 +1,20 @@
-"""Run the paper's RGB-D -> 3D token -> episodic fusion path on synthetic data."""
+"""Run a synthetic online trajectory through the complete memory core."""
 
 import torch
 
-from three_dllm_mem.model import SpatialTemporalMemory
+from three_dllm_mem import SpatialTemporalMemory
 
 
 def main() -> None:
-    torch.manual_seed(7)
-    feature_dim, memory_dim, token_count = 32, 16, 8
-    model = SpatialTemporalMemory(feature_dim, memory_dim, token_count)
-    intrinsics = torch.eye(3).view(1, 1, 3, 3)
-    extrinsics = torch.eye(4).view(1, 1, 4, 4)
-
-    for timestep, scene_id in enumerate(("kitchen", "bedroom"), start=1):
-        features = torch.randn(1, 1, 4, 4, feature_dim)
-        depth = torch.rand(1, 1, 4, 4) + 0.5
-        model.observe(features, depth, intrinsics, extrinsics, scene_id=scene_id, timestep=timestep)
-        model.commit()
-
-    current_features = torch.randn(1, 1, 4, 4, feature_dim)
-    current_depth = torch.rand(1, 1, 4, 4) + 0.5
-    enhanced, attention = model.observe(
-        current_features, current_depth, intrinsics, extrinsics, scene_id="living-room", timestep=3
-    )
-    print(f"memory enhanced: {tuple(enhanced.shape)}")
-    print(f"attention: {tuple(attention.shape)}")
+    model = SpatialTemporalMemory(feature_dim=16, memory_dim=32, num_tokens=8)
+    patches = torch.randn(1, 2, 4, 4, 16)
+    depth = torch.ones(1, 2, 4, 4)
+    intrinsics = torch.eye(3).repeat(1, 2, 1, 1)
+    poses = torch.eye(4).repeat(1, 2, 1, 1)
+    tokens, _ = model.observe(patches, depth, intrinsics, poses, scene_id="kitchen", timestep=0)
+    model.commit()
+    fused, attention = model.observe(patches, depth, intrinsics, poses, scene_id="hall", timestep=1)
+    print(f"working tokens: {tokens.shape}; fused tokens: {fused.shape}; attention: {attention.shape}")
 
 
 if __name__ == "__main__":
